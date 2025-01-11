@@ -1,0 +1,135 @@
+import pandas as pd
+import numpy as np
+
+heart_attack=pd.read_csv('heart_attack.csv')
+heart_attack2=pd.read_csv('heart attack p2.csv')
+heart_attack.sort_values(by=["Age","Gender"],inplace=True,ascending=False)
+heart_attack.reset_index(inplace=True)
+
+print(heart_attack.head())
+print(heart_attack.tail())
+print(heart_attack.describe())
+print(heart_attack.info())
+print(heart_attack.columns)
+print(heart_attack.dtypes)
+print(heart_attack.count())
+print(heart_attack['Age'].corr(heart_attack['Smoking']))
+
+d_heart_attack=heart_attack.dropna(axis=0) 
+print(heart_attack.groupby(['Physical_Activity_Level'])[['Heart_Attack_Risk']]) 
+print(heart_attack.groupby(['Cholesterol_Level'])[['Age']].mean()) 
+print(heart_attack.groupby(['Smoking'])[['Stress_Level']].count()) 
+
+heart= pd.merge(heart_attack,heart_attack2, on=['Gender'])
+heart= pd.merge(heart_attack,heart_attack2, on=['Gender'],how='left')
+heart= pd.merge(heart_attack,heart_attack2, on=['Gender'],how='right')
+heart= pd.merge(heart_attack,heart_attack2, on=['Gender'],how='outer')
+heart_attack['Age']= heart_attack['Age'].astype(np.float64)
+print(heart)
+
+
+heart_attack['Gender']=pd.Categorical(heart_attack['Gender'])
+print(heart_attack["Gender"].cat.categories)
+print(heart_attack["Gender"].cat.codes)
+print(heart_attack.dtypes)
+
+d=["No","Yes"]
+cd = pd.DataFrame(pd.Categorical(d,['No','Yes']),columns=['Smoking'])
+print(cd['Smoking'])
+
+###########################################################################
+import datetime
+
+dt_m = datetime.datetime(2004,5,14,3,0,0)
+dt_j= datetime.datetime(2004,7,21,6,0,0)
+
+ts = pd.date_range('10/1/2025',periods=3, freq='D')
+ts = pd.date_range(dt_m,periods=8, freq='H')
+ts = pd.date_range(dt_j,dt_m,periods=10)
+
+print(ts)
+################################################################
+
+from sklearn.preprocessing import LabelEncoder,Binarizer,MinMaxScaler,StandardScaler,normalize
+encoder = LabelEncoder()
+heart_attack['Physical_Activity_Level'] = encoder.fit_transform(heart_attack.loc[:,['Physical_Activity_Level']])
+binarizer = Binarizer(threshold=115)
+heart_attack['Max_Heart_Rate_Achieved_NORMAL'] = binarizer.fit_transform(heart_attack.loc[:,['Max_Heart_Rate_Achieved']])
+
+mm_Age = MinMaxScaler(feature_range=(0,1))
+heart_attack['Age_mm']= mm_Age.fit_transform(heart_attack.loc[:,['Age']])
+S_Age = StandardScaler()
+heart_attack['Cholesterol_Level_l1']= normalize(heart_attack.loc[:,['Cholesterol_Level']],norm="l1",axis=0)
+
+print(mm_Age)
+print(S_Age)
+print(heart_attack)
+################################################################
+
+import json
+petiont=[{"name":"Ahmed Ali","age":60, "Smoke": True},
+         {"name":"Rula Hassan ","age":35, "Smoke":False}]
+
+fh = open("petiont.json",mode="w")
+json.dump(petiont,fh)
+fh.close()
+
+petiont_json = '[{"name": "Ahmed Ali", "age": 60, "Smoke": true}, {"name": "Rula Hassan", "age": 35, "Smoke": false}]'
+
+petiont = json.loads(petiont_json)
+print(type(petiont))
+
+
+p= open("petiont.json",mode="r")
+p2 = json.load(p)
+print(type(p2))
+
+p.close()
+print(petiont)
+print(petiont_json)
+
+#############################################
+import pandas as pd
+
+petiont_df = pd.read_json('petiont.json')
+print(petiont_df.info())
+petiont_df['age'].replace({60:61,35:36},inplace=True)
+
+petiont_df.to_json("petiont_changed.json",orient="records")
+######################################################
+
+import multiprocessing
+import time
+print(multiprocessing.cpu_count())
+###################################
+import pandas as pd
+def read_p2(filename):
+    p2= pd.DataFrame()
+    df = pd.read_csv(filename,chunksize=2)
+    for p in df:
+        
+        p2 = pd.concat([p2, p],axis=0, ignore_index=True)
+    return p2
+
+print(read_p2('heart_attack.csv'))
+
+##############################
+
+import requests
+
+get_result = requests.get("https://www.youtube.com/")
+get_result = requests.get("https://www.youtube.com/",
+                          params={"q":"Sara"})
+if get_result:
+    print(get_result.url)
+    print(get_result.text)
+else:
+    print("URL not found (Error)")
+
+get_result2 = requests.post("https://www.youtube.com/",
+                           params={"key":"video"})
+if get_result2:
+    print(get_result2.url)
+    print(get_result2.json())
+else:
+    print("URL not found (Error)")
